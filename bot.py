@@ -13,9 +13,9 @@ import threading
 import os
 
 # --- CONFIGURATION ---
-BOT_TOKEN = "8962636653:AAFAX70vpVNhfm8iYg_zf4J5P8w4J2Z-XxA"
-ADMIN_ID = 7132741918
-SUPPORT_USERNAME = "@Bataokyahua"
+BOT_TOKEN = "8912203562:AAGUjAEL1s4GWSGjX1HhMUT-nvB8rmEnyTg"
+ADMIN_ID = 8934747857
+SUPPORT_USERNAME = "@FrontMan4u"
 
 # 🎥 Video ka File ID (Jo tumne provide kiya)
 VIDEO_FILE_ID = "BAACAgUAAxkBAAMNaiRPcu_EDDwEg0TJtoR5UVN9pP0AAqYeAAImdCBVAbbbZYdIM3E7BA" 
@@ -25,7 +25,7 @@ WELCOME_TEXT = f"""
 🎥 ** process samajhne ke liye upar di gayi video ko dhyan se dekhein!**
 
 🔹 **Step 1:** Niche diye gaye link par click karein aur App download karein.
-👉 https://link.super.money/bt6SYj5wxWb
+👉 https://link.super.money/ZRV6EQnc9Ub
 
 🔹 **Step 2:** App open karke apna Registration complete karein iske baad bank account link karke 11 rs dost ko send kare.
 🔹 **Step 3:** Task complete hone ke baad ek saaf **Screenshot** le lein.
@@ -34,7 +34,7 @@ WELCOME_TEXT = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 *Verification ke baad aapko app ki link or step mil jayengi.*
 
-🆘 **Help & Support:** {SUPPORT_USERNAME}
+🆘 **Help & Support:** {@frontman4u}
 """
 
 # --- FLASK DUMMY SERVER (For Render Free Tier 24/7) ---
@@ -104,7 +104,7 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ✅ Aapka screenshot verification ke liye chala gaya hai. 
 
 🎁 **chabbel pe video hai how to use dekho :**
-👉 **[Yahan Click Karke Next Channel Join Karein](https://t.me/techsumanapk/5)**
+👉 **[Yahan Click Karke Next Channel Join Karein](https://t.me/frontmantech/5)**
 ⏳ *channel pe jakar dekho step nahi to problem hoga bro !*
 """
         # 2. User ko instant automatic link aur message bhejna
