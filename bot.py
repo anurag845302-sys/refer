@@ -82,24 +82,24 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
 
     # Pehle emojis ko alag variables mein unicode escape ke saath define karein
-emoji_camera = "\U0001F4F8"
-# ya agar is par bhi error aaye toh lowercase 'u' use karein: "\U0001f4f8"
-emoji_user = "\U0001F464"
-emoji_id = "\U0001F119"
+        emoji_camera = "\U0001F4F8"
+        emoji_user = "\U0001F464"
+        emoji_id = "\U0001F194"
 
-# Ab in variables ko f-string ke andar use karein
-admin_caption = f"""
-{emoji_camera} New Screenshot Received
-{emoji_user} Name: {user.first_name}
-{emoji_id} User ID: {user.id}
-"""
-    try:
-        # 1. Admin ko screenshot bhejna approval ke liye
-        await context.bot.send_photo(
-            chat_id=ADMIN_ID,
-            photo=photo,
-            caption=admin_caption,
-            reply_markup=buttons
+        # Ab in variables ko simple string ke andar use karein (bina triple quotes ke)
+        admin_caption = (
+            f"{emoji_camera} New Screenshot Received\n"
+            f"{emoji_user} Name: {user.first_name}\n"
+            f"{emoji_id} User ID: {user.id}"
+        )
+
+        try:
+            # 1. Admin ko screenshot bhejna approval ke liye
+            await context.bot.send_photo(
+                chat_id=ADMIN_ID,
+                photo=photo,
+                caption=admin_caption,
+                reply_markup=buttons
         )
 
         # Premium Styled Automatic Reply Text for User
@@ -111,16 +111,13 @@ admin_caption = f"""
         emoji_alert = "\u2757"         # ❗️ Exclamation Mark
 
         # Premium Styled Automatic Reply Text for User
-        automatic_reply = f"""
-{emoji_rocket} SCREENSHOT RECEIVED SUCCESSFULLY! {emoji_rocket}
-
-{emoji_check} Aapka screenshot verification ke liye chala gaya hai.
-
-{emoji_tv} chabbel pe video hai how to use dekho :
-
-{emoji_finger} [Yahan Click Karke Next Channel Join Karein](https://t.me)
-{emoji_alert} *channel pe jakar dekho step nahi to problem hoga bro !*
-"""
+        automatic_reply = (
+            f"{emoji_rocket} SCREENSHOT RECEIVED SUCCESSFULLY! {emoji_rocket}\n\n"
+            f"{emoji_check} Aapka screenshot verification ke liye chala gaya hai.\n\n"
+            f"{emoji_tv} chabbel pe video hai how to use dekho :\n\n"
+            f"{emoji_finger} [Yahan Click Karke Next Channel Join Karein](https://t.me)\n"
+            f"{emoji_alert} *channel pe jakar dekho step nahi to problem hoga bro !*"
+        )
 
         # 2. User ko instant automatic link aur message bhejnah
         await update.message.reply_text(
