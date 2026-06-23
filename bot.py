@@ -128,7 +128,6 @@ admin_caption = f"""
             parse_mode="Markdown",
             disable_web_page_preview=False
         )
-
     except Exception as e:
         print(f"Error in photo_handler: {e}")
         await update.message.reply_text("⚠️ Server busy hai, please thodi der baad try karein.")
