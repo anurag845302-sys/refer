@@ -13,8 +13,9 @@ from telegram.ext import (
 )
 
 # --- CONFIGURATION ---
-# ⚠️ BotFather se mila NAYA refreshed token yahan check karein
-BOT_TOKEN = "8912203562:AAGUjAEL1s4GWSGjX1HhMUT-nvB8rmEnyTg" 
+# ⚠️ ATTENTION: BotFather se "Revoke current token" karne ke baad mila NAYA token hi yahan dalein.
+# Agar purana token dalenge toh Render fir se InvalidToken ka error dega.
+BOT_TOKEN = "8912203562:AAHm6s4id2SOMkfxXVrHqEtlzmWJouimMFQ" 
 ADMIN_ID = 8934747857
 SUPPORT_USERNAME = "@FrontMan4u"
 CHANNEL_USERNAME = "@BuynSellLoots" 
@@ -24,9 +25,9 @@ CHANNEL_LINK = "https://t.me/BuynSellLoots"
 VIDEO_FILE_ID = "BAACAgUAAxkBAAMZajpE7Xz073kZu4E5VJWDlcD0qKkAAqQiAALfXNFVhAigRIO2guE8BA" 
 
 # --- 🚀 AUTOMATIC REWARD CONFIGURATION ---
-SUCCESS_LINK = "https://t.me/A_ToolsX"  
+SUCCESS_LINK = "https://t.me/buynsellloots"  
 
-# 📂 Jab aapko APK ki ID mil jaye, toh niche None hata kar "ID_PASTE_KAREIN"
+# 📂 Jab aap APK file forward karenge aur niche handler se ID milegi, toh use yahan dalein
 SUCCESS_FILE_ID = None  
 
 WELCOME_TEXT = (
@@ -90,19 +91,18 @@ async def send_welcome_content(context: ContextTypes.DEFAULT_TYPE, chat_id: int)
         print(f"Video Error: {e}")
         await context.bot.send_message(chat_id=chat_id, text=WELCOME_TEXT, parse_mode="HTML")
 
-# --- 🛠️ FIX ADMIN TOOLS (UNIVERSAL ID FETCH) ---
+# --- 🛠️ FIXED ADMIN TOOLS (CRASH FREE ID GETTER) ---
 async def get_file_ids(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Security: Sirf Admin check
     if update.effective_user.id != ADMIN_ID:
         return
 
-    # 🎥 Video ID Check
+    # Video ID fetcher
     if update.message.video:
         file_id = update.message.video.file_id
         await update.message.reply_text(f"🎥 <b>Video File ID:</b>\n\n<code>{file_id}</code>", parse_mode="HTML")
         return
     
-    # 📦 APK / Document ID Check
+    # APK/Document ID fetcher
     if update.message.document:
         file_id = update.message.document.file_id
         file_name = update.message.document.file_name
@@ -177,7 +177,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             await context.bot.send_message(chat_id=target_user_id, text=success_msg, parse_mode="HTML", disable_web_page_preview=True)
             
-            # File sender
             if SUCCESS_FILE_ID:
                 await context.bot.send_document(
                     chat_id=target_user_id,
@@ -218,8 +217,8 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.PHOTO, photo_handler))
     
-    # 🌟 Fixed Universal Multi-filter (Handles both perfectly)
-    app.add_handler(MessageHandler(filters.VIDEO | filters.DOCUMENT, get_file_ids))  
+    # ✅ FIX: Fixed standard library filters compatibility 
+    app.add_handler(MessageHandler(filters.VIDEO | filters.Document.ALL, get_file_ids))  
     
     app.add_handler(CallbackQueryHandler(button_handler))
     
