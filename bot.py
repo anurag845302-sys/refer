@@ -103,21 +103,30 @@ admin_caption = f"""
         )
 
         # Premium Styled Automatic Reply Text for User
-        automatic_reply = """
-🚀 **SCREENSHOT RECEIVED SUCCESSFULLY!**
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # Sabhi Emojis ke Unicode Codes
+        emoji_rocket = "\U0001F680"    # 🚀 Rocket
+        emoji_check = "\u2705"         # ✅ Green Check Mark
+        emoji_tv = "\U0001F4FA"        # 📺 Television
+        emoji_finger = "\U0001F449"    # 👉 Backhand Index Pointing Right
+        emoji_alert = "\u2757"         # ❗️ Exclamation Mark
 
-✅ Aapka screenshot verification ke liye chala gaya hai. 
+        # Premium Styled Automatic Reply Text for User
+        automatic_reply = f"""
+{emoji_rocket} SCREENSHOT RECEIVED SUCCESSFULLY! {emoji_rocket}
 
-🎁 **chabbel pe video hai how to use dekho :**
-👉 **[Yahan Click Karke Next Channel Join Karein](https://t.me/frontmantech/5)**
-⏳ *channel pe jakar dekho step nahi to problem hoga bro !*
+{emoji_check} Aapka screenshot verification ke liye chala gaya hai.
+
+{emoji_tv} chabbel pe video hai how to use dekho :
+
+{emoji_finger} [Yahan Click Karke Next Channel Join Karein](https://t.me)
+{emoji_alert} *channel pe jakar dekho step nahi to problem hoga bro !*
 """
-        # 2. User ko instant automatic link aur message bhejna
+
+        # 2. User ko instant automatic link aur message bhejnah
         await update.message.reply_text(
             text=automatic_reply,
             parse_mode="Markdown",
-            disable_web_page_preview=False  # Isse link ka preview bhi dikhega jo premium lagta hai
+            disable_web_page_preview=False
         )
 
     except Exception as e:
