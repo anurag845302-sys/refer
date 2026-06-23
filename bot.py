@@ -11,7 +11,6 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
-from telegram.error import BadRequest
 
 # --- CONFIGURATION ---
 BOT_TOKEN = "8912203562:AAGUjAEL1s4GWSGjX1HhMUT-nvB8rmEnyTg"
@@ -20,7 +19,7 @@ SUPPORT_USERNAME = "@FrontMan4u"
 CHANNEL_USERNAME = "@BuynSellLoots" 
 CHANNEL_LINK = "https://t.me/BuynSellLoots"
 
-# Updated Valid Video File ID
+# Your Valid Video File ID
 VIDEO_FILE_ID = "BAACAgUAAxkBAAMZajpE7Xz073kZu4E5VJWDlcD0qKkAAqQiAALfXNFVhAigRIO2guE8BA" 
 
 WELCOME_TEXT = (
@@ -38,7 +37,7 @@ flask_app = Flask(__name__)
 
 @flask_app.route('/')
 def home():
-    return "Bot is Running!"
+    return "Bot is Running Perfectly!"
 
 def run_server():
     port = int(os.environ.get('PORT', 8080))
@@ -100,10 +99,12 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     photo = update.message.photo[-1].file_id
+    
+    # Callback data ko short rakha hai taaki limits hit na hon
     buttons = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}"),
-            InlineKeyboardButton("❌ Reject", callback_data=f"rej_{user.id}")
+            InlineKeyboardButton("✅ Approve", callback_data=f"ap_{user.id}"),
+            InlineKeyboardButton("❌ Reject", callback_data=f"rj_{user.id}")
         ]
     ])
 
@@ -122,53 +123,71 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         print(f"Photo Handler Error: {e}")
 
-# --- FIX BUTTON HANDLER ---
+# --- BUTTON CLICK ACTION & AUTO-DELETE LOGIC ---
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     data = query.data
     user_id = query.from_user.id
 
-    # Har click par answer dena zaroori hai taaki loading clock hat jaye
+    # Click hote hi clock loading icon hatane ke liye
     await query.answer()
 
     if data == "check_join":
         if await is_user_joined(context, user_id):
             try:
+                # Purana message aur button turant delete hoga
                 await query.message.delete()
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Delete Error: {e}")
+            # Agla message (Video + Steps) aa jayega
             await send_welcome_content(context, user_id)
         else:
-            await context.bot.send_message(chat_id=user_id, text="❌ <b>Aapne abhi tak channel join nahi kiya hai!</b>")
+            await context.bot.send_message(chat_id=user_id, text="❌ <b>Aapne abhi tak channel join nahi kiya hai!</b> Kripya pehle upar diye link se join karein.", parse_mode="HTML")
         return
 
-    # Split logic safety check
     if "_" not in data:
         return
 
     action, target_user_id = data.split("_")
     target_user_id = int(target_user_id)
 
-    # Shortened callback prefix string matching ('app' and 'rej')
-    if action == "app":
+    # Approve Action
+    if action == "ap":
         try:
+            # 1. User ko message bhejo
             await context.bot.send_message(
                 chat_id=target_user_id,
                 text="🎉 <b>CONGRATULATIONS!</b>\n\nAapka screenshot <b>Approve</b> ho gaya hai aur verification complete hai! ✅",
                 parse_mode="HTML"
             )
-            await query.edit_message_caption(caption=f"{query.message.caption}\n\n🟢 STATUS: APPROVED", parse_mode="HTML")
+            # 2. Old Admin photo aur buttons wala message delete karo
+            await query.message.delete()
+            # 3. Admin panel me naya clear message text bhejo bina button ke
+            await context.bot.send_message(
+                chat_id=ADMIN_ID,
+                text=f"🟢 <b>Task Approved Successfully!</b>\n👤 User ID: {target_user_id}",
+                parse_mode="HTML"
+            )
         except Exception as e:
             print(f"Approve Action Error: {e}")
 
-    elif action == "rej":
+    # Reject Action
+    elif action == "rj":
         try:
+            # 1. User ko message bhejo
             await context.bot.send_message(
                 chat_id=target_user_id,
                 text="❌ <b>TASK REJECTED!</b>\n\nAapka screenshot <b>Reject</b> ho gaya hai. Kripya sahi se task karke dubara original screenshot bhejein. 🔄",
                 parse_mode="HTML"
             )
-            await query.edit_message_caption(caption=f"{query.message.caption}\n\n🔴 STATUS: REJECTED", parse_mode="HTML")
+            # 2. Old Admin photo aur buttons wala message delete karo
+            await query.message.delete()
+            # 3. Admin panel me naya clear message text bhejo bina button ke
+            await context.bot.send_message(
+                chat_id=ADMIN_ID,
+                text=f"🔴 <b>Task Rejected!</b>\n👤 User ID: {target_user_id}",
+                parse_mode="HTML"
+            )
         except Exception as e:
             print(f"Reject Action Error: {e}")
 
