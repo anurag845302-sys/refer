@@ -13,71 +13,53 @@ from telegram.ext import (
 )
 from telegram.error import BadRequest
 
-# --- GLOBAL EMOJIS FOR ADMIN ---
-EMOJI_CAMERA = "📸"
-EMOJI_USER = "👤"
-EMOJI_ID = "🆔"
-
 # --- CONFIGURATION ---
 BOT_TOKEN = "8912203562:AAGUjAEL1s4GWSGjX1HhMUT-nvB8rmEnyTg"
 ADMIN_ID = 8934747857
 SUPPORT_USERNAME = "@FrontMan4u"
-
-# Telegram Channel Configuration (Force Join)
-# NOTE: Bot ko is channel me ADMIN banana compulsory hai!
 CHANNEL_USERNAME = "@BuynSellLoots" 
 CHANNEL_LINK = "https://t.me/BuynSellLoots"
 
-# 🎥 Video ka File ID (Updated with your new valid ID)
+# Updated Valid Video File ID
 VIDEO_FILE_ID = "BAACAgUAAxkBAAMZajpE7Xz073kZu4E5VJWDlcD0qKkAAqQiAALfXNFVhAigRIO2guE8BA" 
 
-# Premium Styled Welcome Text Emojis
-emoji_video = "📹"     
-emoji_movie = "🎥"     
-emoji_hand = "👉"      
-emoji_blue_dot = "🔹"  
-
 WELCOME_TEXT = (
-    f"{emoji_movie} <b>Process samajhne ke liye upar di gayi video ko dhyan se dekhe!</b>\n\n"
-    f"{emoji_hand} <b>Step 1:</b> Niche diye gaye link par click karein aur App download karein.\n"
+    f"🎥 <b>Process samajhne ke liye upar di gayi video ko dhyan se dekhe!</b>\n\n"
+    f"👉 <b>Step 1:</b> Niche diye gaye link par click karein aur App download karein.\n"
     f"https://link.super.money/ZRV6EQnc9Ub\n\n"
-    f"{emoji_blue_dot} <b>Step 2:</b> App open karke apna Registration complete karein iske baad bank account link karke 11 rs dost ko send karein.\n"
-    f"{emoji_blue_dot} <b>Step 3:</b> Task complete hone ke baad ek saaf <b>screenshot</b> le lein.\n"
-    f"{emoji_blue_dot} <b>Step 4:</b> Us screenshot ko is bot mein send karein.\n\n"
+    f"🔹 <b>Step 2:</b> App open karke apna Registration complete karein iske baad bank account link karke 11 rs dost ko send karein.\n"
+    f"🔹 <b>Step 3:</b> Task complete hone ke baad ek saaf <b>screenshot</b> le lein.\n"
+    f"🔹 <b>Step 4:</b> Us screenshot ko is bot mein send karein.\n\n"
     f"ℹ️ <i>Verification ke baad aapko app ki link or step mil jayengi.</i>\n\n"
     f"📩 <b>Help & Support:</b> {SUPPORT_USERNAME}"
 )
 
-# --- FLASK DUMMY SERVER (For Render Free Tier 24/7) ---
 flask_app = Flask(__name__)
 
 @flask_app.route('/')
 def home():
-    return "Bot is Alive and Running 24/7!"
+    return "Bot is Running!"
 
 def run_server():
     port = int(os.environ.get('PORT', 8080))
     flask_app.run(host='0.0.0.0', port=port)
 
-# --- HELPER FUNCTION: CHECK CHANNEL JOIN ---
+# --- CHECK JOIN FUNCTION ---
 async def is_user_joined(context: ContextTypes.DEFAULT_TYPE, user_id: int) -> bool:
     try:
         member = await context.bot.get_chat_member(chat_id=CHANNEL_USERNAME, user_id=user_id)
         if member.status in ['member', 'administrator', 'creator']:
             return True
         return False
-    except BadRequest:
-        return False
     except Exception as e:
-        print(f"Error checking join status: {e}")
+        print(f"Join Check Error: {e}")
         return False
 
-# --- BOT HANDLERS ---
+# --- HANDLERS ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    
-    # Force Join Check
     joined = await is_user_joined(context, user_id)
+    
     if not joined:
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)],
@@ -90,10 +72,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # Agar already joined hai toh seedhe video send karo
     await send_welcome_content(context, user_id)
 
-# Content sender logic (Video + Text)
 async def send_welcome_content(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     try:
         await context.bot.send_video(
@@ -103,142 +83,104 @@ async def send_welcome_content(context: ContextTypes.DEFAULT_TYPE, chat_id: int)
             parse_mode="HTML"
         )
     except Exception as e:
-        print(f"Error sending video: {e}")
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=f"⚠️ <i>(Video send nahi ho payi, Admin please check File ID)</i>\n\n{WELCOME_TEXT}",
-            parse_mode="HTML"
-        )
+        print(f"Video Error: {e}")
+        await context.bot.send_message(chat_id=chat_id, text=WELCOME_TEXT, parse_mode="HTML")
 
-# Admin Tool: Kisi bhi video ko bot par forward karo to file ID mil jayegi
 async def get_video_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id == ADMIN_ID:
-        file_id = update.message.video.file_id
-        await update.message.reply_text(f"🎥 <b>Video File ID:</b>\n\n<code>{file_id}</code>", parse_mode="HTML")
+        await update.message.reply_text(f"🎥 <b>Video File ID:</b>\n<code>{update.message.video.file_id}</code>", parse_mode="HTML")
 
-# 📸 SCREENSHOT HANDLER
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    
     joined = await is_user_joined(context, user.id)
+    
     if not joined:
         keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)]])
-        await update.message.reply_text(
-            "⚠️ <b>Pehle channel join karein, uske baad hi screenshot verify hoga!</b>",
-            reply_markup=keyboard,
-            parse_mode="HTML"
-        )
+        await update.message.reply_text("⚠️ <b>Pehle channel join karein, tabhi screenshot verify hoga!</b>", reply_markup=keyboard, parse_mode="HTML")
         return
 
     photo = update.message.photo[-1].file_id
-
-    # Admin Panel Controls
     buttons = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("✅ Approve", callback_data=f"approve_{user.id}"),
-            InlineKeyboardButton("❌ Reject", callback_data=f"reject_{user.id}")
+            InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}"),
+            InlineKeyboardButton("❌ Reject", callback_data=f"rej_{user.id}")
         ]
     ])
 
-    admin_caption = (
-        f"{EMOJI_CAMERA} <b>New Screenshot Received</b>\n"
-        f"{EMOJI_USER} Name: {user.first_name}\n"
-        f"{EMOJI_ID} User ID: {user.id}"
-    )
+    admin_caption = f"📸 <b>New Screenshot Received</b>\n👤 Name: {user.first_name}\n🆔 User ID: {user.id}"
 
     try:
-        await context.bot.send_photo(
-            chat_id=ADMIN_ID,
-            photo=photo,
-            caption=admin_caption,
-            reply_markup=buttons,
-            parse_mode="HTML"
-        )
-
+        await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo, caption=admin_caption, reply_markup=buttons, parse_mode="HTML")
+        
         automatic_reply = (
             "🚀 <b>SCREENSHOT RECEIVED SUCCESSFULLY!</b> 🚀\n\n"
             "✅ Aapka screenshot verification ke liye chala gaya hai.\n\n"
-            "📺 Channel pe video hai how to use dekho:\n\n"
-            "👉 <a href='https://t.me/BuynSellLoots'>Yahan Click Karke Next Channel Join Karein</a>\n\n"
-            "❗ <i>Channel pe jakar dekho step nahi to problem hoga bro !</i>"
+            "📺 Channel pe video hai how to use dekho:\n"
+            "👉 <a href='https://t.me/BuynSellLoots'>Yahan Click Karke Next Channel Join Karein</a>"
         )
-
-        await update.message.reply_text(
-            text=automatic_reply,
-            parse_mode="HTML",
-            disable_web_page_preview=True
-        )
+        await update.message.reply_text(text=automatic_reply, parse_mode="HTML", disable_web_page_preview=True)
     except Exception as e:
-        print(f"Error in photo_handler: {e}")
-        await update.message.reply_text("⚠️ Server busy hai, please thodi der baad try karein.")
+        print(f"Photo Handler Error: {e}")
 
-# Callback button handler
+# --- FIX BUTTON HANDLER ---
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
     data = query.data
+    user_id = query.from_user.id
+
+    # Har click par answer dena zaroori hai taaki loading clock hat jaye
+    await query.answer()
 
     if data == "check_join":
-        user_id = query.from_user.id
-        joined = await is_user_joined(context, user_id)
-        if joined:
+        if await is_user_joined(context, user_id):
             try:
                 await query.message.delete()
             except Exception:
                 pass
             await send_welcome_content(context, user_id)
         else:
-            await context.bot.send_message(
-                chat_id=user_id,
-                text="❌ <b>Aapne abhi tak channel join nahi kiya hai!</b> Kripya pehle join karein.",
-                parse_mode="HTML"
-            )
+            await context.bot.send_message(chat_id=user_id, text="❌ <b>Aapne abhi tak channel join nahi kiya hai!</b>")
         return
 
-    # Admin Approve/Reject Logic
-    action, user_id = data.split("_")
-    user_id = int(user_id)
+    # Split logic safety check
+    if "_" not in data:
+        return
 
-    if action == "approve":
+    action, target_user_id = data.split("_")
+    target_user_id = int(target_user_id)
+
+    # Shortened callback prefix string matching ('app' and 'rej')
+    if action == "app":
         try:
             await context.bot.send_message(
-                chat_id=user_id,
+                chat_id=target_user_id,
                 text="🎉 <b>CONGRATULATIONS!</b>\n\nAapka screenshot <b>Approve</b> ho gaya hai aur verification complete hai! ✅",
                 parse_mode="HTML"
             )
-            await query.edit_message_caption(
-                caption=query.message.caption + "\n\n🟢 STATUS: APPROVED"
-            )
+            await query.edit_message_caption(caption=f"{query.message.caption}\n\n🟢 STATUS: APPROVED", parse_mode="HTML")
         except Exception as e:
-            print(f"Error approving: {e}")
+            print(f"Approve Action Error: {e}")
 
-    elif action == "reject":
+    elif action == "rej":
         try:
             await context.bot.send_message(
-                chat_id=user_id,
+                chat_id=target_user_id,
                 text="❌ <b>TASK REJECTED!</b>\n\nAapka screenshot <b>Reject</b> ho gaya hai. Kripya sahi se task karke dubara original screenshot bhejein. 🔄",
                 parse_mode="HTML"
             )
-            await query.edit_message_caption(
-                caption=query.message.caption + "\n\n🔴 STATUS: REJECTED"
-            )
+            await query.edit_message_caption(caption=f"{query.message.caption}\n\n🔴 STATUS: REJECTED", parse_mode="HTML")
         except Exception as e:
-            print(f"Error rejecting: {e}")
+            print(f"Reject Action Error: {e}")
 
-# --- MAIN RUNNER ---
 def main():
-    print("Starting Web Server...")
     threading.Thread(target=run_server, daemon=True).start()
-
-    print("Bot Starting...")
     app = Application.builder().token(BOT_TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.PHOTO, photo_handler))
     app.add_handler(MessageHandler(filters.VIDEO, get_video_id))  
     app.add_handler(CallbackQueryHandler(button_handler))
-
-    print("Polling started successfully!")
+    
     app.run_polling()
 
 if __name__ == "__main__":
