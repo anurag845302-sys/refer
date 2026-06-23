@@ -82,9 +82,9 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
 
     admin_caption = f"""
-📸 New Screenshot Received
-👤 Name: {user.first_name}
-🆔 User ID: {user.id}
+\U0001F4F8 New Screenshot Received
+\U0001F464 Name: {user.first_name}
+\U0001F194 User ID: {user.id}
 """
     try:
         # 1. Admin ko screenshot bhejna approval ke liye
