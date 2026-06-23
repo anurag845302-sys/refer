@@ -68,7 +68,7 @@ async def get_video_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
         file_id = update.message.video.file_id
         await update.message.reply_text(f"🎥 **Video File ID:**\n\n`{file_id}`", parse_mode="Markdown")
 
-# 📸 SCREENSHOT HANDLER (AUTOMATIC SYSTEM)
+#📸 SCREENSHOT HANDLER (AUTOMATIC SYSTEM)
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     photo = update.message.photo[-1].file_id
