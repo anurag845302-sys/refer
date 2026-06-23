@@ -22,7 +22,7 @@ VIDEO_FILE_ID = "BAACAgUAAxkBAAMNaiRPcu_EDDwEg0TJtoR5UVN9pP0AAqYeAAImdCBVAbbbZYd
 
 # Premium Styled Welcome Text
 WELCOME_TEXT = f"""
-🎥 ** process samajhne ke liye upar di gayi video ko dhyan se dekhein!**
+🎥 ** process samajhne ke liye upar di gayi video ko dhyan se dekhe!**
 
 🔹 **Step 1:** Niche diye gaye link par click karein aur App download karein.
 👉 https://link.super.money/ZRV6EQnc9Ub
