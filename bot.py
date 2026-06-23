@@ -83,19 +83,18 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ])
 
-    # Pehle emojis ko bina kisi space ke left side me define karein
-emoji_camera = "\U0001F4F8"
-emoji_user = "\U0001F464"
-emoji_id = "\U0001F194"
+    # Pehle emojis ko sahi space ke sath define karein
+        emoji_camera = "\U0001F4F8"
+        emoji_user = "\U0001F464"
+        emoji_id = "\U0001F194"
 
-# Caption ko bhi bina kisi extra space ke set karein
-admin_caption = (
-    f"{emoji_camera} New Screenshot Received\n"
-    f"{emoji_user} Name: {user.first_name}\n"
-    f"{emoji_id} User ID: {user.id}"
-)
+        # Caption string brackets ke sath
+        admin_caption = (
+            f"{emoji_camera} New Screenshot Received\n"
+            f"{emoji_user} Name: {user.first_name}\n"
+            f"{emoji_id} User ID: {user.id}"
+        )
 
-# Yahan se aapka purana try block shuru hoga jisme exact 8 spaces hone chahiye
         try:
             # 1. Admin ko screenshot bhejna approval ke liye
             await context.bot.send_photo(
@@ -103,7 +102,7 @@ admin_caption = (
                 photo=photo,
                 caption=admin_caption,
                 reply_markup=buttons
-        )
+            )
 
         # Premium Styled Automatic Reply Text for User
         # Sabhi Emojis ke Unicode Codes
