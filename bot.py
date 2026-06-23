@@ -86,22 +86,25 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("❌ Reject", callback_data=f"reject_{user.id}")
         ]
     ])
-        # Yahan koi emoji variable nahi rakhna hai, seedhe try block shuru karein
-        try:
-            # Caption string ko global emojis ke sath yahan define karein
-            admin_caption = (
-                f"{EMOJI_CAMERA} New Screenshot Received\n"
-                f"{EMOJI_USER} Name: {user.first_name}\n"
-                f"{EMOJI_ID} User ID: {user.id}"
-            )
+        async def photo_handler(update, context):
+    user = update.message.from_user
+    photo = update.message.photo[-1].file_id
 
-            # 1. Admin ko screenshot bhejna approval ke liye
-            await context.bot.send_photo(
-                chat_id=ADMIN_ID,
-                photo=photo,
-                caption=admin_caption,
-                reply_markup=buttons
-            )
+    # Sabhi global variables ka use karke caption banana
+    admin_caption = (
+        f"{EMOJI_CAMERA} New Screenshot Received\n"
+        f"{EMOJI_USER} Name: {user.first_name}\n"
+        f"{EMOJI_ID} User ID: {user.id}"
+    )
+
+    try:
+        # 1. Admin ko screenshot bhejna approval ke liye
+        await context.bot.send_photo(
+            chat_id=ADMIN_ID,
+            photo=photo,
+            caption=admin_caption,
+            reply_markup=buttons
+        )
 
         # Premium Styled Automatic Reply Text for User
         # Sabhi Emojis ke Unicode Codes
