@@ -13,14 +13,21 @@ from telegram.ext import (
 )
 
 # --- CONFIGURATION ---
-BOT_TOKEN = "8912203562:AAEwKZSp6rTcEpaM_uATf4x2tIouxK7l6XY"
+BOT_TOKEN = "8912203562:AAGUjAEL1s4GWSGjX1HhMUT-nvB8rmEnyTg" 
 ADMIN_ID = 8934747857
 SUPPORT_USERNAME = "@FrontMan4u"
 CHANNEL_USERNAME = "@BuynSellLoots" 
 CHANNEL_LINK = "https://t.me/BuynSellLoots"
 
-# Your Valid Video File ID
+# Video File ID
 VIDEO_FILE_ID = "BAACAgUAAxkBAAMZajpE7Xz073kZu4E5VJWDlcD0qKkAAqQiAALfXNFVhAigRIO2guE8BA" 
+
+# --- 🚀 AUTOMATIC REWARD CONFIGURATION ---
+SUCCESS_LINK = "https://t.me/A_ToolsX"  
+
+# 📂 Agar aapko Approve hone ke baad APK file bhejni hai, 
+# toh niche None ki jagah bhejte waqt mili hui FILE ID paste kar dena (e.g., "BQACAg...")
+SUCCESS_FILE_ID = None  
 
 WELCOME_TEXT = (
     f"🎥 <b>Process samajhne ke liye upar di gayi video ko dhyan se dekhe!</b>\n\n"
@@ -43,7 +50,6 @@ def run_server():
     port = int(os.environ.get('PORT', 8080))
     flask_app.run(host='0.0.0.0', port=port)
 
-# --- CHECK JOIN FUNCTION ---
 async def is_user_joined(context: ContextTypes.DEFAULT_TYPE, user_id: int) -> bool:
     try:
         member = await context.bot.get_chat_member(chat_id=CHANNEL_USERNAME, user_id=user_id)
@@ -54,7 +60,6 @@ async def is_user_joined(context: ContextTypes.DEFAULT_TYPE, user_id: int) -> bo
         print(f"Join Check Error: {e}")
         return False
 
-# --- HANDLERS ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     joined = await is_user_joined(context, user_id)
@@ -85,9 +90,22 @@ async def send_welcome_content(context: ContextTypes.DEFAULT_TYPE, chat_id: int)
         print(f"Video Error: {e}")
         await context.bot.send_message(chat_id=chat_id, text=WELCOME_TEXT, parse_mode="HTML")
 
-async def get_video_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id == ADMIN_ID:
-        await update.message.reply_text(f"🎥 <b>Video File ID:</b>\n<code>{update.message.video.file_id}</code>", parse_mode="HTML")
+# --- 🛠️ NEW ADMIN TOOLS (VIDEO & APK/DOCUMENT ID GETTER) ---
+async def get_file_ids(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Sirf Admin ke liye kaam karega
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    # Agar Video bheji hai
+    if update.message.video:
+        file_id = update.message.video.file_id
+        await update.message.reply_text(f"🎥 <b>Video File ID:</b>\n<code>{file_id}</code>", parse_mode="HTML")
+    
+    # Agar APK/Document bheja hai
+    elif update.message.document:
+        file_id = update.message.document.file_id
+        file_name = update.message.document.file_name
+        await update.message.reply_text(f"📦 <b>File/APK ID ({file_name}):</b>\n<code>{file_id}</code>", parse_mode="HTML")
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -99,8 +117,6 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     photo = update.message.photo[-1].file_id
-    
-    # Callback data ko short rakha hai taaki limits hit na hon
     buttons = InlineKeyboardMarkup([
         [
             InlineKeyboardButton("✅ Approve", callback_data=f"ap_{user.id}"),
@@ -123,23 +139,19 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         print(f"Photo Handler Error: {e}")
 
-# --- BUTTON CLICK ACTION & AUTO-DELETE LOGIC ---
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     data = query.data
     user_id = query.from_user.id
 
-    # Click hote hi clock loading icon hatane ke liye
     await query.answer()
 
     if data == "check_join":
         if await is_user_joined(context, user_id):
             try:
-                # Purana message aur button turant delete hoga
                 await query.message.delete()
             except Exception as e:
                 print(f"Delete Error: {e}")
-            # Agla message (Video + Steps) aa jayega
             await send_welcome_content(context, user_id)
         else:
             await context.bot.send_message(chat_id=user_id, text="❌ <b>Aapne abhi tak channel join nahi kiya hai!</b> Kripya pehle upar diye link se join karein.", parse_mode="HTML")
@@ -154,18 +166,27 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Approve Action
     if action == "ap":
         try:
-            # 1. User ko message bhejo
-            await context.bot.send_message(
-                chat_id=target_user_id,
-                text="🎉 <b>CONGRATULATIONS!</b>\n\nAapka screenshot <b>Approve</b> ho gaya hai aur verification complete hai! ✅",
-                parse_mode="HTML"
+            success_msg = (
+                "🎉 <b>CONGRATULATIONS!</b>\n\n"
+                "Aapka screenshot <b>Approve</b> ho gaya hai aur verification complete hai! ✅\n\n"
+                f"🎁 <b>Aapka Reward Link/Secret Link yeh raha:</b>\n"
+                f"👉 {SUCCESS_LINK}\n\n"
+                "<i>Niche diye gaye link par click karke join/access karein!</i>"
             )
-            # 2. Old Admin photo aur buttons wala message delete karo
+            await context.bot.send_message(chat_id=target_user_id, text=success_msg, parse_mode="HTML", disable_web_page_preview=True)
+            
+            # Automatic File Deliver Option
+            if SUCCESS_FILE_ID:
+                await context.bot.send_document(
+                    chat_id=target_user_id,
+                    document=SUCCESS_FILE_ID,
+                    caption="📦 <b>Aapki requested file/app yeh rahi!</b>"
+                )
+
             await query.message.delete()
-            # 3. Admin panel me naya clear message text bhejo bina button ke
             await context.bot.send_message(
                 chat_id=ADMIN_ID,
-                text=f"🟢 <b>Task Approved Successfully!</b>\n👤 User ID: {target_user_id}",
+                text=f"🟢 <b>Task Approved Successfully!</b>\n👤 User ID: {target_user_id}\n🎁 Reward sent automatically.",
                 parse_mode="HTML"
             )
         except Exception as e:
@@ -174,15 +195,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Reject Action
     elif action == "rj":
         try:
-            # 1. User ko message bhejo
             await context.bot.send_message(
                 chat_id=target_user_id,
                 text="❌ <b>TASK REJECTED!</b>\n\nAapka screenshot <b>Reject</b> ho gaya hai. Kripya sahi se task karke dubara original screenshot bhejein. 🔄",
                 parse_mode="HTML"
             )
-            # 2. Old Admin photo aur buttons wala message delete karo
             await query.message.delete()
-            # 3. Admin panel me naya clear message text bhejo bina button ke
             await context.bot.send_message(
                 chat_id=ADMIN_ID,
                 text=f"🔴 <b>Task Rejected!</b>\n👤 User ID: {target_user_id}",
@@ -197,7 +215,10 @@ def main():
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.PHOTO, photo_handler))
-    app.add_handler(MessageHandler(filters.VIDEO, get_video_id))  
+    
+    # Combined Multi-Filter for Admin Tools (Handles Video and APK/Documents)
+    app.add_handler(MessageHandler(filters.VIDEO | filters.Document.ALL, get_file_ids))  
+    
     app.add_handler(CallbackQueryHandler(button_handler))
     
     app.run_polling()
