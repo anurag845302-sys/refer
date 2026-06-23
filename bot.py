@@ -13,6 +13,7 @@ from telegram.ext import (
 )
 
 # --- CONFIGURATION ---
+# ⚠️ BotFather se mila NAYA refreshed token yahan check karein
 BOT_TOKEN = "8912203562:AAGUjAEL1s4GWSGjX1HhMUT-nvB8rmEnyTg" 
 ADMIN_ID = 8934747857
 SUPPORT_USERNAME = "@FrontMan4u"
@@ -25,8 +26,7 @@ VIDEO_FILE_ID = "BAACAgUAAxkBAAMZajpE7Xz073kZu4E5VJWDlcD0qKkAAqQiAALfXNFVhAigRIO
 # --- 🚀 AUTOMATIC REWARD CONFIGURATION ---
 SUCCESS_LINK = "https://t.me/A_ToolsX"  
 
-# 📂 Agar aapko Approve hone ke baad APK file bhejni hai, 
-# toh niche None ki jagah bhejte waqt mili hui FILE ID paste kar dena (e.g., "BQACAg...")
+# 📂 Jab aapko APK ki ID mil jaye, toh niche None hata kar "ID_PASTE_KAREIN"
 SUCCESS_FILE_ID = None  
 
 WELCOME_TEXT = (
@@ -90,22 +90,24 @@ async def send_welcome_content(context: ContextTypes.DEFAULT_TYPE, chat_id: int)
         print(f"Video Error: {e}")
         await context.bot.send_message(chat_id=chat_id, text=WELCOME_TEXT, parse_mode="HTML")
 
-# --- 🛠️ NEW ADMIN TOOLS (VIDEO & APK/DOCUMENT ID GETTER) ---
+# --- 🛠️ FIX ADMIN TOOLS (UNIVERSAL ID FETCH) ---
 async def get_file_ids(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Sirf Admin ke liye kaam karega
+    # Security: Sirf Admin check
     if update.effective_user.id != ADMIN_ID:
         return
 
-    # Agar Video bheji hai
+    # 🎥 Video ID Check
     if update.message.video:
         file_id = update.message.video.file_id
-        await update.message.reply_text(f"🎥 <b>Video File ID:</b>\n<code>{file_id}</code>", parse_mode="HTML")
+        await update.message.reply_text(f"🎥 <b>Video File ID:</b>\n\n<code>{file_id}</code>", parse_mode="HTML")
+        return
     
-    # Agar APK/Document bheja hai
-    elif update.message.document:
+    # 📦 APK / Document ID Check
+    if update.message.document:
         file_id = update.message.document.file_id
         file_name = update.message.document.file_name
-        await update.message.reply_text(f"📦 <b>File/APK ID ({file_name}):</b>\n<code>{file_id}</code>", parse_mode="HTML")
+        await update.message.reply_text(f"📦 <b>File/APK ID ({file_name}):</b>\n\n<code>{file_id}</code>", parse_mode="HTML")
+        return
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -175,7 +177,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             await context.bot.send_message(chat_id=target_user_id, text=success_msg, parse_mode="HTML", disable_web_page_preview=True)
             
-            # Automatic File Deliver Option
+            # File sender
             if SUCCESS_FILE_ID:
                 await context.bot.send_document(
                     chat_id=target_user_id,
@@ -216,8 +218,8 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.PHOTO, photo_handler))
     
-    # Combined Multi-Filter for Admin Tools (Handles Video and APK/Documents)
-    app.add_handler(MessageHandler(filters.VIDEO | filters.Document.ALL, get_file_ids))  
+    # 🌟 Fixed Universal Multi-filter (Handles both perfectly)
+    app.add_handler(MessageHandler(filters.VIDEO | filters.DOCUMENT, get_file_ids))  
     
     app.add_handler(CallbackQueryHandler(button_handler))
     
