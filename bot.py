@@ -28,7 +28,7 @@ VIDEO_FILE_ID = "BAACAgUAAxkBAAMZajpE7Xz073kZu4E5VJWDlcD0qKkAAqQiAALfXNFVhAigRIO
 SUCCESS_LINK = "https://t.me/buynsellloots"  
 
 # 📂 Jab aap APK file forward karenge aur niche handler se ID milegi, toh use yahan dalein
-SUCCESS_FILE_ID = None  
+SUCCESS_FILE_ID = "BQACAgUAAxkBAANDajqWHHAWTwOnip55NTn5zFZwPtIAArghAAK_aVhV3r8er5hy1RE8BA"  
 
 WELCOME_TEXT = (
     f"🎥 <b>Process samajhne ke liye upar di gayi video ko dhyan se dekhe!</b>\n\n"
