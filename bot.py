@@ -11,6 +11,7 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+from telegram.error import BadRequest
 
 # --- GLOBAL EMOJIS FOR ADMIN ---
 EMOJI_CAMERA = "\U0001F4F8"
@@ -21,6 +22,11 @@ EMOJI_ID = "\U0001F194"
 BOT_TOKEN = "8912203562:AAGUjAEL1s4GWSGjX1HhMUT-nvB8rmEnyTg"
 ADMIN_ID = 8934747857
 SUPPORT_USERNAME = "@FrontMan4u"
+
+# Telegram Channel Configuration (Force Join)
+# Note: Bot ko apne channel me ADMIN banana zaroori hai tabhi ye check kaam karega.
+CHANNEL_USERNAME = "@BuynSellLoots" 
+CHANNEL_LINK = "https://t.me/BuynSellLoots"
 
 # 🎥 Video ka File ID
 VIDEO_FILE_ID = "BAACAgUAAxkBAAMNaiRPcu_EDDwEg0TJtoR5UVN9pP0AAqYeAAImdCBVAbbbZYdIM3E7BA" 
@@ -54,9 +60,40 @@ def run_server():
     port = int(os.environ.get('PORT', 8080))
     flask_app.run(host='0.0.0.0', port=port)
 
+# --- HELPER FUNCTION: CHECK CHANNEL JOIN ---
+async def is_user_joined(context: ContextTypes.DEFAULT_TYPE, user_id: int) -> bool:
+    try:
+        member = await context.bot.get_chat_member(chat_id=CHANNEL_USERNAME, user_id=user_id)
+        if member.status in ['member', 'administrator', 'creator']:
+            return True
+        return False
+    except BadRequest:
+        # Agar bot channel me admin nahi hai ya koi error hai
+        return False
+    except Exception as e:
+        print(f"Error checking join status: {e}")
+        return False
+
 # --- BOT HANDLERS ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if VIDEO_FILE_ID != "YAHAN_FILE_ID_PASTE_KARNA":
+    user_id = update.effective_user.id
+    
+    # Check if joined channel
+    joined = await is_user_joined(context, user_id)
+    if not joined:
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)],
+            [InlineKeyboardButton("✅ I Have Joined / Check Again", callback_data="check_join")]
+        ])
+        await update.message.reply_text(
+            "⚠️ **Aapko pehle humare Telegram Channel ko join karna hoga tabhi bot kaam karega!**",
+            reply_markup=keyboard,
+            parse_mode="Markdown"
+        )
+        return
+
+    # Video bhejna agar user joined hai
+    if VIDEO_FILE_ID and VIDEO_FILE_ID != "YAHAN_FILE_ID_PASTE_KARNA":
         try:
             await update.message.reply_video(
                 video=VIDEO_FILE_ID,
@@ -75,12 +112,24 @@ async def get_video_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
         file_id = update.message.video.file_id
         await update.message.reply_text(f"🎥 **Video File ID:**\n\n`{file_id}`", parse_mode="Markdown")
 
-# 📸 SCREENSHOT HANDLER (AUTOMATIC SYSTEM)
+# 📸 SCREENSHOT HANDLER
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    
+    # Photo handler me bhi force join check lagaya hai takki koi bina join kiye photo na bhej sake
+    joined = await is_user_joined(context, user.id)
+    if not joined:
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)]])
+        await update.message.reply_text(
+            "⚠️ **Pehle channel join karein, uske baad hi screenshot verify hoga!**",
+            reply_markup=keyboard,
+            parse_mode="Markdown"
+        )
+        return
+
     photo = update.message.photo[-1].file_id
 
-    # Admin Panel ke liye buttons
+    # Admin Panel ke buttons
     buttons = InlineKeyboardMarkup([
         [
             InlineKeyboardButton("✅ Approve", callback_data=f"approve_{user.id}"),
@@ -95,7 +144,6 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        # 1. Admin ko screenshot bhejna approval ke liye
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
             photo=photo,
@@ -103,23 +151,20 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=buttons
         )
 
-        # User Reply ke sabhi Emojis
         emoji_rocket = "\U0001F680"    # 🚀 Rocket
         emoji_check = "\u2705"         # ✅ Green Check Mark
         emoji_tv = "\U0001F4FA"        # 📺 Television
         emoji_finger = "\U0001F449"    # 👉 Backhand Index Pointing Right
         emoji_alert = "\u2757"         # ❗️ Exclamation Mark
 
-        # Premium Styled Automatic Reply Text for User
         automatic_reply = (
             f"{emoji_rocket} **SCREENSHOT RECEIVED SUCCESSFULLY!** {emoji_rocket}\n\n"
             f"{emoji_check} Aapka screenshot verification ke liye chala gaya hai.\n\n"
-            f"{emoji_tv} chabbel pe video hai how to use dekho :\n\n"
+            f"{emoji_tv} channel pe video hai how to use dekho :\n\n"
             f"{emoji_finger} [Yahan Click Karke Next Channel Join Karein](https://t.me)\n\n"
             f"{emoji_alert} *channel pe jakar dekho step nahi to problem hoga bro !*"
         )
 
-        # 2. User ko instant automatic link aur message bhejna
         await update.message.reply_text(
             text=automatic_reply,
             parse_mode="Markdown",
@@ -129,11 +174,37 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(f"Error in photo_handler: {e}")
         await update.message.reply_text("⚠️ Server busy hai, please thodi der baad try karein.")
 
+# Callback button handler (Approve/Reject aur Check Join dono ke liye)
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data
 
+    # Check Join Button Logic
+    if data == "check_join":
+        user_id = query.from_user.id
+        joined = await is_user_joined(context, user_id)
+        if joined:
+            await query.message.delete()  # Purana message delete karein
+            # /start command ko programmatically trigger karein
+            if VIDEO_FILE_ID:
+                try:
+                    await context.bot.send_video(
+                        chat_id=user_id,
+                        video=VIDEO_FILE_ID,
+                        caption=WELCOME_TEXT,
+                        parse_mode="Markdown"
+                    )
+                except Exception:
+                    await context.bot.send_message(chat_id=user_id, text=WELCOME_TEXT, parse_mode="Markdown")
+        else:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="❌ **Aapne abhi tak channel join nahi kiya hai!** Kripya pehle join karein."
+            )
+        return
+
+    # Admin Approve/Reject Logic
     action, user_id = data.split("_")
     user_id = int(user_id)
 
@@ -173,7 +244,7 @@ def main():
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.PHOTO, photo_handler))
-    app.add_handler(MessageHandler(filters.VIDEO, get_video_id))
+    app.add_handler(MessageHandler(filters.VIDEO, get_video_id))  # Fixed broken code here
     app.add_handler(CallbackQueryHandler(button_handler))
 
     print("Polling started successfully!")
