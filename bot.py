@@ -81,10 +81,17 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ])
 
-    admin_caption = f"""
-\U0001F4F8 New Screenshot Received
-\U0001F464 Name: {user.first_name}
-\U0001F194 User ID: {user.id}
+    # Pehle emojis ko alag variables mein unicode escape ke saath define karein
+emoji_camera = "\U0001F4F8"
+# ya agar is par bhi error aaye toh lowercase 'u' use karein: "\U0001f4f8"
+emoji_user = "\U0001F464"
+emoji_id = "\U0001F119"
+
+# Ab in variables ko f-string ke andar use karein
+admin_caption = f"""
+{emoji_camera} New Screenshot Received
+{emoji_user} Name: {user.first_name}
+{emoji_id} User ID: {user.id}
 """
     try:
         # 1. Admin ko screenshot bhejna approval ke liye
