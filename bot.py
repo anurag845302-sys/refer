@@ -34,8 +34,7 @@ WELCOME_TEXT = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 *Verification ke baad aapko app ki link or step mil jayengi.*
 
-🆘 **Help & Support:** {@frontman4u}
-"""
+🆘 text="*Help & Support:** @frontman4u"
 
 # --- FLASK DUMMY SERVER (For Render Free Tier 24/7) ---
 flask_app = Flask(__name__)
