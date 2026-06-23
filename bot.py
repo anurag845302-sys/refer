@@ -1,3 +1,7 @@
+# Sabhi global variables bina kisi space ke bilkul left margin se chipka kar likhein
+EMOJI_CAMERA = "\U0001F4F8"
+EMOJI_USER = "\U0001F464"
+EMOJI_ID = "\U0001F194"
 #!/usr/bin/env python3
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -82,20 +86,15 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("❌ Reject", callback_data=f"reject_{user.id}")
         ]
     ])
-
-    # Pehle emojis ko sahi space ke sath define karein
-        emoji_camera = "\U0001F4F8"
-        emoji_user = "\U0001F464"
-        emoji_id = "\U0001F194"
-
-        # Caption string brackets ke sath
-        admin_caption = (
-            f"{emoji_camera} New Screenshot Received\n"
-            f"{emoji_user} Name: {user.first_name}\n"
-            f"{emoji_id} User ID: {user.id}"
-        )
-
+        # Yahan koi emoji variable nahi rakhna hai, seedhe try block shuru karein
         try:
+            # Caption string ko global emojis ke sath yahan define karein
+            admin_caption = (
+                f"{EMOJI_CAMERA} New Screenshot Received\n"
+                f"{EMOJI_USER} Name: {user.first_name}\n"
+                f"{EMOJI_ID} User ID: {user.id}"
+            )
+
             # 1. Admin ko screenshot bhejna approval ke liye
             await context.bot.send_photo(
                 chat_id=ADMIN_ID,
