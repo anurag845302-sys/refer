@@ -21,21 +21,23 @@ SUPPORT_USERNAME = "@FrontMan4u"
 VIDEO_FILE_ID = "BAACAgUAAxkBAAMNaiRPcu_EDDwEg0TJtoR5UVN9pP0AAqYeAAImdCBVAbbbZYdIM3E7BA" 
 
 # Premium Styled Welcome Text
-WELCOME_TEXT = f"""
-🎥 ** process samajhne ke liye upar di gayi video ko dhyan se dekhe!**
+# Emojis ko safe unicode mein define karein
+emoji_video = "\U0001F4F9"     # 📹 Video
+emoji_movie = "\U0001F3AC"     # 🎥 Movie camera
+emoji_hand = "\U0001F449"      # 👉 Hand pointing right
+emoji_blue_dot = "\U0001F539"  # 🔹 Blue diamond / dot
 
-🔹 **Step 1:** Niche diye gaye link par click karein aur App download karein.
-👉 https://link.super.money/ZRV6EQnc9Ub
-
-🔹 **Step 2:** App open karke apna Registration complete karein iske baad bank account link karke 11 rs dost ko send kare.
-🔹 **Step 3:** Task complete hone ke baad ek saaf **Screenshot** le lein.
-🔹 **Step 4:** Us Screenshot ko is bot mein send karein.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 *Verification ke baad aapko app ki link or step mil jayengi.*
-
-🆘 text="*Help & Support:** @frontman4u"
-
+WELCOME_TEXT = (
+    f"{emoji_video} Video ka File ID (Jo tumne provide kiya)\n\n"
+    f"{emoji_movie} process samajhne ke liye upar di gayi video ko dhyan se dekhe!\n\n"
+    f"{emoji_hand} Step 1: Niche diye gaye link par click karein aur App download karein.\n"
+    f"https://link.super.money/ZRV6EQnc9Ub"
+    f"{emoji_blue_dot} Step 2: App open karke apna Registration complete karein iske baad bank account link karke 11 rs dost ko send karein.\n"
+    f"{emoji_blue_dot} Step 3: Task complete hone ke baad ek saaf screenshot le lein.\n"
+    f"{emoji_blue_dot} Step 4: Us screenshot ko is bot mein send karein.\n\n"
+    f"ℹ️ *Verification ke baad aapko app ki link or step mil jayengi.*\n\n"
+    f"📩 text=\"*Help & Support:* @Frontman4u\""
+)
 # --- FLASK DUMMY SERVER (For Render Free Tier 24/7) ---
 flask_app = Flask(__name__)
 
